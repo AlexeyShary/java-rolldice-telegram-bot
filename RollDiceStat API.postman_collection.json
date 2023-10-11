@@ -1,0 +1,50 @@
+{
+	"info": {
+		"_postman_id": "80b03c46-956a-4eff-a896-43a870284633",
+		"name": "RollDiceStat API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26948900"
+	},
+	"item": [
+		{
+			"name": "Get last 5",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8085/stats/last",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8085",
+					"path": [
+						"stats",
+						"last"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get 5 most popular",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8085/stats/popular",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8085",
+					"path": [
+						"stats",
+						"popular"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

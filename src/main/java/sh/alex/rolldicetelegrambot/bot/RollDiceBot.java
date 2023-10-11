@@ -1,6 +1,7 @@
 package sh.alex.rolldicetelegrambot.bot;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -11,10 +12,14 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import sh.alex.rolldicetelegrambot.stats.logic.StatsService;
 
 @Component
 @PropertySource("classpath:application-secret.properties")
+@RequiredArgsConstructor
 public class RollDiceBot extends TelegramLongPollingBot {
+    private final StatsService statsService;
+
     @Value("${telegram.bot.name}")
     private String botName;
 
@@ -54,6 +59,7 @@ public class RollDiceBot extends TelegramLongPollingBot {
                     }
 
                     sendResponse(message.getChatId(), result.toString());
+                    statsService.storeDiceRoll(messageText, result.toString());
                 }
             }
         }
