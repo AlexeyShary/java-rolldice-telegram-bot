@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bot stats</title>
+</head>
+<body>
+<h1>Last requests</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Request</th>
+        <th>Result</th>
+        <th>Timestamp</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="last : ${lasts}">
+        <td th:text="${last.request}"></td>
+        <td th:text="${last.result}"></td>
+        <td th:text="${last.timestamp}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<h1>Popular requests</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Request</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="popular : ${popular}">
+        <td th:text="${popular.request}"></td>
+        <td th:text="${popular.count}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
