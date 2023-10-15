@@ -4,8 +4,8 @@ This is a Telegram bot that simulates dice rolls for users. Processed requests a
 
 ## Deployed example
 
-https://t.me/JavaRollDiceBot - Telegram bot
-http://185.117.153.156:8081/stats - Statistics
+- https://t.me/JavaRollDiceBot - Telegram bot
+- http://185.117.153.156:8081/stats - Statistics
 
 ## Stack
 
