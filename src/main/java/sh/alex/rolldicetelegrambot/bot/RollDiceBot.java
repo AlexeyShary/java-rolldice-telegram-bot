@@ -42,45 +42,64 @@ public class RollDiceBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             String messageText = update.getMessage().getText();
 
-            if (messageText.equals("/start")) {
-                sendResponse(message.getChatId(), "Hello! I'm RollDiceBot. Write a message in the format [x]d[y], " +
-                        "where x is the number of rolls, and y is the number of sides on the die, and I will roll them " +
-                        "for you. For example, 2d6 is a roll of two six-sided dice.");
-            }
-
-            if (messageText.matches("\\d+d\\d+")) {
-                String[] parts = messageText.split("d");
-
-                int numDice;
-                int numFaces;
-
-                try {
-                    numDice = Integer.parseInt(parts[0]);
-                    numFaces = Integer.parseInt(parts[1]);
-                } catch (NumberFormatException e) {
-                    sendResponse(message.getChatId(), "Sorry, I can't understand the numbers.");
-                    return;
-                }
-
-                if (numDice <= 0 || numFaces <= 0) {
-                    sendResponse(message.getChatId(), "Sorry, the numbers must be > 0.");
-                    return;
-                }
-
-                StringBuilder result = new StringBuilder();
-
-                for (int i = 0; i < numDice; i++) {
-                    int roll = (int) (Math.random() * numFaces) + 1;
-                    result.append(roll);
-                    if (i < numDice - 1) {
-                        result.append(", ");
-                    }
-                }
-
-                sendResponse(message.getChatId(), result.toString());
-                statsService.storeDiceRoll(messageText, result.toString());
+            if (update.getMessage().getChat().isUserChat()) {
+                handlePersonalChatMessage(message, messageText);
+            } else {
+                handleGroupChatMessage(message, messageText);
             }
         }
+    }
+
+    private void handlePersonalChatMessage(Message message, String messageText) {
+        if (messageText.equals("/start")) {
+            sendResponse(message.getChatId(), "Hello! I'm RollDiceBot. Write a message in the format [x]d[y], " +
+                    "where x is the number of rolls, and y is the number of sides on the die, and I will roll them " +
+                    "for you. For example, 2d6 is a roll of two six-sided dice.");
+        }
+
+        if (messageText.matches("\\d+d\\d+")) {
+            rollDice(message, messageText);
+        }
+    }
+
+    private void handleGroupChatMessage(Message message, String messageText) {
+        if (messageText.startsWith("/roll")) {
+            String rollRequest = messageText.substring("/roll".length()).trim();
+            rollDice(message, rollRequest);
+        }
+    }
+
+    private void rollDice(Message message, String rollRequest) {
+        String[] parts = rollRequest.split("d");
+
+        int numDice;
+        int numFaces;
+
+        try {
+            numDice = Integer.parseInt(parts[0]);
+            numFaces = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            sendResponse(message.getChatId(), "Sorry, I can't understand the numbers.");
+            return;
+        }
+
+        if (numDice <= 0 || numFaces <= 0) {
+            sendResponse(message.getChatId(), "Sorry, the numbers must be > 0.");
+            return;
+        }
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < numDice; i++) {
+            int roll = (int) (Math.random() * numFaces) + 1;
+            result.append(roll);
+            if (i < numDice - 1) {
+                result.append(", ");
+            }
+        }
+
+        sendResponse(message.getChatId(), result.toString());
+        statsService.storeDiceRoll(rollRequest, result.toString());
     }
 
     @PostConstruct

@@ -9,7 +9,13 @@ This is a Telegram bot that simulates dice rolls for users. Processed requests a
 
 ## Bot usage
 
+### Single chat mode
+
 The bot expects a message from the user in the format [x]d[y], where x is the number of rolls, and y is the number of sides on the die. In response to the user's message, the bot will provide the results of rolling the dice. For example, if the user sends the message "2d6," the bot will return two numbers representing the outcomes of rolling two six-sided dice.
+
+### Group chat mode
+
+You can add the bot to any Telegram group. To enable the bot to see messages, you need to grant it administrator rights in the group. After that, the bot will respond to messages in the format "/roll [x]d[y]". The bot will not respond to messages that do not start with the "/roll" command.
 
 ## Stack
 
