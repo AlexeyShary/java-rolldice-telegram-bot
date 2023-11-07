@@ -7,12 +7,18 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import sh.alex.rolldicetelegrambot.stats.logic.StatsService;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @PropertySource("classpath:application-secret.properties")
@@ -52,7 +58,7 @@ public class RollDiceBot extends TelegramLongPollingBot {
 
     private void handlePersonalChatMessage(Message message, String messageText) {
         if (messageText.equals("/start")) {
-            sendResponse(message.getChatId(), "Hello! I'm RollDiceBot. Write a message in the format [x]d[y], " +
+            sendResponse(message.getChatId(), message.getMessageThreadId(), "Hello! I'm RollDiceBot. Write a message in the format [x]d[y], " +
                     "where x is the number of rolls, and y is the number of sides on the die, and I will roll them " +
                     "for you. For example, 2d6 is a roll of two six-sided dice.");
         }
@@ -79,12 +85,12 @@ public class RollDiceBot extends TelegramLongPollingBot {
             numDice = Integer.parseInt(parts[0]);
             numFaces = Integer.parseInt(parts[1]);
         } catch (NumberFormatException e) {
-            sendResponse(message.getChatId(), "Sorry, I can't understand the numbers.");
+            sendResponse(message.getChatId(), message.getMessageThreadId(), "Enter the command /roll [x]d[y], where x is the number of dice, and y is the number of sides on the dice. For example, /roll 3d6 - roll three six-sided dice");
             return;
         }
 
         if (numDice <= 0 || numFaces <= 0) {
-            sendResponse(message.getChatId(), "Sorry, the numbers must be > 0.");
+            sendResponse(message.getChatId(), message.getMessageThreadId(), "Sorry, the numbers must be > 0.");
             return;
         }
 
@@ -98,24 +104,33 @@ public class RollDiceBot extends TelegramLongPollingBot {
             }
         }
 
-        sendResponse(message.getChatId(), result.toString());
+        sendResponse(message.getChatId(), message.getMessageThreadId(), result.toString());
         statsService.storeDiceRoll(rollRequest, result.toString());
     }
 
     @PostConstruct
     private void init() {
         try {
+            List<BotCommand> commands = Arrays.asList(
+                    new BotCommand("/roll", "Roll dices")
+            );
+
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            this.execute(new SetMyCommands(commands, new BotCommandScopeDefault(), null));
             telegramBotsApi.registerBot(this);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
-    private void sendResponse(Long chatId, String text) {
+    private void sendResponse(Long chatId, Integer threadId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(text);
+
+        if (threadId != null) {
+            message.setMessageThreadId(threadId);
+        }
 
         try {
             execute(message);
